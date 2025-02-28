@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard - Cybersecurity Chatbot</title>
+    <style>
+        /* CSS Reset */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+
+        :root {
+            --primary-color: #2a2f4f;
+            --secondary-color: #0077b6;
+            --accent-color: #00b4d8;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #fd7e14;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            text-align: center;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            flex: 1;
+        }
+
+        .chat-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 70vh;
+        }
+
+        .chat-header {
+            background-color: var(--secondary-color);
+            color: var(--light-color);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chat-header svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .chat-body {
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            word-break: break-word;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            background-color: var(--accent-color);
+            color: var(--light-color);
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .bot-message {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .chat-footer {
+            padding: 1rem;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 180, 216, 0.25);
+        }
+
+        .send-btn {
+            background-color: var(--secondary-color);
+            color: var(--light-color);
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .send-btn:hover {
+            background-color: var(--primary-color);
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            margin-top: 0.5rem;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 4px;
+            border-radius: 50%;
+            background-color: #999;
+            animation: blink 1.4s infinite both;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+
+            0%,
+            80%,
+            100% {
+                opacity: 0.2;
+            }
+
+            40% {
+                opacity: 1;
+            }
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .suggestion-chip {
+            background-color: #e9ecef;
+            padding: 0.5rem 1rem;
+            border-radius: 1.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-size: 0.9rem;
+        }
+
+        .suggestion-chip:hover {
+            background-color: var(--accent-color);
+            color: var(--light-color);
+        }
+
+        pre {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem 0;
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            margin-top: 2rem;
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .chat-container {
+                height: 80vh;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .chat-input {
+                font-size: 0.9rem;
+            }
+
+            .send-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .suggestions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .suggestion-chip {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>DigiRaksha</h1>
+        <p>Your Cybersecurity Assistant</p>
+    </header>
+  
+
+    <div class="container">
+        <div class="chat-container">
+            <div class="chat-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M12 2a10 10 0 0 0-9.75 12h3.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-.75.75h-3.5a10 10 0 0 0 9.75 4.99 10 10 0 0 0 10-10 9.98 9.98 0 0 0-10-10Zm3 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm-6 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm1.5 5a3.5 3.5 0 0 0 7 0h-7Z" />
+                </svg>
+                <h2>Chat with DigiRaksha - Cyber Security Awareness Chatbot</h2>
+            </div>
+
+            <div class="chat-body" id="chat-body">
+                <div class="suggestions">
+                    <div class="suggestion-chip" onclick="selectSuggestion(this)">What is a firewall?</div>
+                    <div class="suggestion-chip" onclick="selectSuggestion(this)">How to create a strong password?</div>
+                    <div class="suggestion-chip" onclick="selectSuggestion(this)">What is phishing?</div>
+                    <div class="suggestion-chip" onclick="selectSuggestion(this)">Explain zero trust security</div>
+                </div>
+                <div class="message bot-message">
+                    Hello! I'm CyberGuard, your cybersecurity assistant. How can I help you today?
+                </div>
+
+                <div class="typing-indicator" id="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <div class="chat-footer">
+                <input type="text" class="chat-input" id="chat-input"
+                    placeholder="Type your cybersecurity question here..." onkeydown="if(event.key === 'Enter') sendMessage()">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>DigiRaksha - Cyber Security Awareness Chatbot &copy; 2025 | Cybersecurity Educational Tool</p>
+    </footer>
+
+    <script>
+        const knowledgeBase = {
+            "what is cybersecurity": "Cybersecurity refers to the practice of protecting systems, networks, and programs from digital attacks. These attacks often aim to access, change, or destroy sensitive information, extort money, or interrupt normal business processes. Effective cybersecurity strategies employ multiple layers of protection spread across computers, networks, programs, and data.",
+
+            "why is cybersecurity important": "Cybersecurity is crucial because individuals, organizations, and governments increasingly rely on digital systems. With the growth of cloud services, IoT devices, and remote work, the attack surface has expanded dramatically. Data breaches can lead to financial losses, damage to reputation, regulatory fines, and even national security threats.",
+
+            "what are the main types of cyber threats": "The main types of cyber threats include: 1) Malware (viruses, ransomware, spyware) 2) Phishing attacks 3) Man-in-the-middle attacks 4) Denial-of-Service attacks 5) SQL injection 6) Zero-day exploits 7) DNS tunneling 8) Social engineering 9) Advanced Persistent Threats (APTs) 10) Insider threats",
+
+            "what is a firewall": "A firewall is a network security device that monitors and filters incoming and outgoing network traffic based on an organization's previously established security policies. It acts as a barrier between a trusted network and an untrusted network (like the internet). Firewalls can be hardware, software, or both, and they use rule sets to determine which traffic is allowed or blocked.",
+
+            "what is a vpn": "A VPN (Virtual Private Network) is a service that creates a secure, encrypted connection over a less secure network, such as the public internet. VPNs provide privacy by masking your IP address and encrypting your internet traffic, making it difficult for third parties to track your online activities or steal your data. They're commonly used for secure remote access to corporate networks and for private browsing.",
+
+            "what is network segmentation": "Network segmentation is the practice of dividing a computer network into smaller, isolated subnetworks to improve security and performance. By creating these segments, organizations can control the flow of traffic between segments and apply specific security policies to each one. This limits the damage potential of a breach, as attackers who gain access to one segment cannot easily move to others.",
+
+            "what is ids and ips": "IDS (Intrusion Detection System) and IPS (Intrusion Prevention System) are security technologies that monitor network traffic for suspicious activity:\n\nIDS: Passively monitors and alerts security teams when potential threats are detected\nIPS: Actively blocks or prevents detected threats in real-time\n\nBoth technologies use signature-based detection (known attack patterns), anomaly-based detection (deviations from normal behavior), or both to identify potential security incidents.",
+
+            "explain zero trust security": "Zero Trust is a security model that operates on the principle 'never trust, always verify.' Unlike traditional approaches that trust everything inside the network perimeter, Zero Trust assumes breach and verifies each request as if it originates from an untrusted network. Key principles include:\n\n1. Verify explicitly: Authenticate and authorize based on all available data points\n2. Use least privilege access: Limit user access with Just-In-Time and Just-Enough-Access\n3. Assume breach: Minimize blast radius and segment access, verify end-to-end encryption, and use analytics to improve defenses",
+
+            "what are common network attacks": "Common network attacks include:\n\n1. DDoS (Distributed Denial of Service): Overwhelms systems with traffic to disrupt service\n2. Man-in-the-Middle (MitM): Intercepts communication between two parties\n3. ARP spoofing: Redirects traffic by associating an attacker's MAC address with a legitimate IP\n4. DNS poisoning: Corrupts DNS information to redirect traffic\n5. Packet sniffing: Captures and analyzes network traffic\n6. IP spoofing: Creates packets with false source IP addresses\n7. Session hijacking: Takes over authenticated user sessions\n8. MAC flooding: Overwhelms switch MAC tables to force broadcast mode",
+
+            "what is two-factor authentication": "Two-factor authentication (2FA) is a security method that requires users to provide two different authentication factors to verify their identity. These factors typically include:\n\n1. Something you know (password, PIN)\n2. Something you have (mobile device, security token)\n3. Something you are (biometric verification)\n\n2FA significantly enhances security because even if an attacker obtains your password, they cannot access your account without the second factor. It's widely recommended for protecting sensitive accounts and data.",
+
+            "what is mfa": "Multi-Factor Authentication (MFA) is a security process that requires users to provide two or more verification factors to gain access to a resource. These factors include:\n\n1. Knowledge factors (passwords, PINs)\n2. Possession factors (security tokens, mobile devices)\n3. Inherence factors (biometrics like fingerprints)\n4. Location factors (GPS location)\n5. Time factors (time-based restrictions)\n\nMFA is an extension of 2FA that can incorporate additional factors, providing stronger security than single-factor authentication.",
+
+            "how to create a strong password": "To create a strong password:\n\n1. Length: Use at least 12-16 characters\n2. Complexity: Include uppercase and lowercase letters, numbers, and special characters\n3. Avoid predictable patterns: Don't use sequential numbers or keyboard patterns (e.g., qwerty)\n4. Avoid personal information: Don't use names, birthdates, or easily guessable personal details\n5. Use passphrases: Consider a memorable phrase with modifications\n6. Make it unique: Use different passwords for different accounts\n7. Consider a password manager: Generate and store complex passwords securely\n\nExample of a strong password: 'Tr@vel-2-M00n-S0meday!'",
+
+            "what is a password manager": "A password manager is a specialized application designed to store and manage online credentials securely. It generates, retrieves, and keeps track of complex passwords, PINs, and other sensitive information in an encrypted database, often secured by a single master password or biometric authentication. Benefits include:\n\n1. Generating strong, unique passwords for each account\n2. Auto-filling credentials on websites and apps\n3. Securing information in an encrypted vault\n4. Cross-device synchronization\n5. Alerting users to compromised passwords\n\nPopular options include LastPass, 1Password, Bitwarden, and KeePass.",
+
+            "what is principle of least privilege": "The Principle of Least Privilege (PoLP) is a computer security concept that restricts user access rights to the minimum level necessary to perform required tasks. By implementing PoLP, organizations reduce the risk of insider threats and limit the potential damage from malware or compromised accounts. This approach ensures that users and processes only have access to the resources and data they need, thereby enhancing overall security posture."
+        };
+
+        const chatBody = document.getElementById('chat-body');
+        const chatInput = document.getElementById('chat-input');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'flex';
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function appendMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', `${type}-message`);
+            messageDiv.textContent = message;
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight; // Scroll to bottom
+        }
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                appendMessage(message, 'user');
+                chatInput.value = '';
+                getBotResponse(message);
+            }
+        }
+
+        function getBotResponse(message) {
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                const response = knowledgeBase[message.toLowerCase()] || "I'm sorry, I don't have information on that topic. Please ask another question.";
+                appendMessage(response, 'bot');
+            }, 1500);
+        }
+
+        function selectSuggestion(element) {
+            chatInput.value = element.textContent;
+            sendMessage();
+        }
+    </script>
+</body>
+
+</html>
