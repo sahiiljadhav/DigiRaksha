@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Security Quiz</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --correct-color: #2ecc71;
+            --wrong-color: #e74c3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f6fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .start-screen, .score-container, .leaderboard-container {
+            text-align: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--secondary-color);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-accent {
+            background-color: var(--accent-color);
+        }
+        
+        .btn-accent:hover {
+            background-color: #c0392b;
+        }
+        
+        .quiz-container {
+            display: none;
+        }
+        
+        .question-number {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .option-container {
+            display: block;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option-container:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .option-container.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+        }
+        
+        .option-container.wrong {
+            background-color: var(--wrong-color);
+            color: white;
+            border-color: var(--wrong-color);
+        }
+        
+        .option-container.disabled {
+            pointer-events: none;
+        }
+        
+        .score-container {
+            display: none;
+            text-align: center;
+        }
+        
+        .score-container h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .score-container .score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        
+        .name-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .name-input input {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .leaderboard-container {
+            display: none;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .leaderboard-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .leaderboard-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .leaderboard-table tr:hover {
+            background-color: #eeeeee;
+        }
+        
+        .timer-container {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .timer {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--secondary-color);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            header p {
+                font-size: 1rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .question-text {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cyber Security Quiz</h1>
+            <p>Test your knowledge about cyber security concepts</p>
+        </header>
+        
+        <!-- Start Screen -->
+        <div class="card start-screen">
+            <h2>Ready to start?</h2>
+            <p>This quiz consists of 10 questions about cyber security. You'll have 30 seconds to answer each question.</p>
+            <button id="start-btn" class="btn">Start Quiz</button>
+            <button id="leaderboard-btn" class="btn">View Leaderboard</button>
+        </div>
+        
+        <!-- Quiz Container -->
+        <div class="card quiz-container">
+            <div class="timer-container">
+                Time Left: <span class="timer">30</span> seconds
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            <div class="question-number">Question 1 of 10</div>
+            <div class="question-text"></div>
+            <div class="options-container"></div>
+            <button id="next-btn" class="btn" style="display: none;">Next Question</button>
+        </div>
+        
+        <!-- Score Container -->
+        <div class="card score-container">
+            <h2>Quiz Completed!</h2>
+            <p>Your Score:</p>
+            <div class="score">0</div>
+            <div class="name-input">
+                <label for="player-name">Enter your name to save your score:</label>
+                <input type="text" id="player-name" placeholder="Your Name">
+                <button id="save-score-btn" class="btn">Save Score</button>
+            </div>
+            <button id="restart-btn" class="btn">Restart Quiz</button>
+            <button id="view-leaderboard-btn" class="btn">View Leaderboard</button>
+        </div>
+        
+        <!-- Leaderboard Container -->
+        <div class="card leaderboard-container">
+            <h2>Leaderboard</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- Leaderboard entries will be added here -->
+                </tbody>
+            </table>
+            <button id="back-btn" class="btn">Back to Start</button>
+        </div>
+    </div>
+    
+    <script>
+        // Quiz questions
+        const questions = [
+            {
+                question: "What is phishing?",
+                options: [
+                    "A type of fish that hackers use as mascots",
+                    "A fraudulent attempt to obtain sensitive information by disguising as a trustworthy entity",
+                    "A method to recover lost passwords",
+                    "A technique to speed up internet connection"
+                ],
+                answer: 1
+            },
+            {
+                question: "What does the 'S' in HTTPS stand for?",
+                options: [
+                    "Safe",
+                    "Solid",
+                    "Secure",
+                    "Standard"
+                ],
+                answer: 2
+            },
+            {
+                question: "Which of the following is a best practice for password security?",
+                options: [
+                    "Using the same password for all accounts",
+                    "Writing down passwords on a sticky note",
+                    "Using short, simple passwords that are easy to remember",
+                    "Using a unique password for each account"
+                ],
+                answer: 3
+            },
+            {
+                question: "What is a firewall?",
+                options: [
+                    "A physical wall that prevents fire damage to servers",
+                    "A security system that monitors and controls network traffic",
+                    "A tool that speeds up internet connection",
+                    "A type of antivirus software"
+                ],
+                answer: 1
+            },
+            {
+                question: "What is two-factor authentication (2FA)?",
+                options: [
+                    "A method that requires two people to authenticate",
+                    "A security process that requires two different passwords",
+                    "A method that requires two forms of identification before granting access",
+                    "A login process that takes twice as long"
+                ],
+                answer: 2
+            },
+            {
+                question: "What type of malware locks your files and demands payment for their release?",
+                options: [
+                    "Worm",
+                    "Virus",
+                    "Trojan",
+                    "Ransomware"
+                ],
+                answer: 3
+            },
+            {
+                question: "What is social engineering in the context of cyber security?",
+                options: [
+                    "Building social networks securely",
+                    "Manipulating people into divulging confidential information",
+                    "Developing social media applications",
+                    "Engineering social platforms with security in mind"
+                ],
+                answer: 1
+            },
+            {
+                question: "What does VPN stand for?",
+                options: [
+                    "Virtual Private Network",
+                    "Very Powerful Network",
+                    "Virtual Protected Node",
+                    "Verified Personal Network"
+                ],
+                answer: 0
+            },
+            {
+                question: "Which of the following is NOT a common cyber attack method?",
+                options: [
+                    "SQL Injection",
+                    "Cross-site Scripting (XSS)",
+                    "Distributed Denial of Service (DDoS)",
+                    "Physical Interface Protection (PIP)"
+                ],
+                answer: 3
+            },
+            {
+                question: "What is the best way to protect against malware?",
+                options: [
+                    "Never turn your computer off",
+                    "Open all email attachments to check them",
+                    "Keep your software updated and use antivirus protection",
+                    "Use the same USB drive on all computers"
+                ],
+                answer: 2
+            }
+        ];
+        
+        // DOM Elements
+        const startScreen = document.querySelector('.start-screen');
+        const quizContainer = document.querySelector('.quiz-container');
+        const scoreContainer = document.querySelector('.score-container');
+        const leaderboardContainer = document.querySelector('.leaderboard-container');
+        const questionNumber = document.querySelector('.question-number');
+        const questionText = document.querySelector('.question-text');
+        const optionsContainer = document.querySelector('.options-container');
+        const nextButton = document.getElementById('next-btn');
+        const startButton = document.getElementById('start-btn');
+        const leaderboardButton = document.getElementById('leaderboard-btn');
+        const restartButton = document.getElementById('restart-btn');
+        const viewLeaderboardButton = document.getElementById('view-leaderboard-btn');
+        const backButton = document.getElementById('back-btn');
+        const saveScoreButton = document.getElementById('save-score-btn');
+        const playerNameInput = document.getElementById('player-name');
+        const scoreDisplay = document.querySelector('.score');
+        const timerDisplay = document.querySelector('.timer');
+        const progressBar = document.querySelector('.progress-bar');
+        const leaderboardBody = document.getElementById('leaderboard-body');
+        
+        // Quiz Variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer;
+        let timeLeft = 30;
+        let quizCompleted = false;
+        
+        // Start Quiz
+        startButton.addEventListener('click', startQuiz);
+        
+        // Start Quiz Function
+        function startQuiz() {
+            startScreen.style.display = 'none';
+            quizContainer.style.display = 'block';
+            currentQuestionIndex = 0;
+            score = 0;
+            loadQuestion();
+        }
+        
+        // Load Question
+        function loadQuestion() {
+            // Reset timer
+            clearInterval(timer);
+            timeLeft = 30;
+            timerDisplay.textContent = timeLeft;
+            startTimer();
+            
+            // Update progress bar
+            progressBar.style.width = `${(currentQuestionIndex / questions.length) * 100}%`;
+            
+            const currentQuestion = questions[currentQuestionIndex];
+            questionNumber.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+            questionText.textContent = currentQuestion.question;
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+            
+            // Add new options
+            currentQuestion.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option-container');
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                optionElement.addEventListener('click', checkAnswer);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            nextButton.style.display = 'none';
+        }
+        
+        // Check Answer
+        function checkAnswer(e) {
+            clearInterval(timer);
+            
+            const selectedOption = e.target;
+            const selectedAnswer = parseInt(selectedOption.dataset.index);
+            const correctAnswer = questions[currentQuestionIndex].answer;
+            
+            // Disable all options
+            const options = document.querySelectorAll('.option-container');
+            options.forEach(option => {
+                option.classList.add('disabled');
+            });
+            
+            // Mark correct and wrong answers
+            if (selectedAnswer === correctAnswer) {
+                selectedOption.classList.add('correct');
+                score++;
+            } else {
+                selectedOption.classList.add('wrong');
+                options[correctAnswer].classList.add('correct');
+            }
+            
+            // Show next button
+            nextButton.style.display = 'block';
+        }
+        
+        // Next Question
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                endQuiz();
+            }
+        });
+        
+        // Timer Function
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    // Auto-select wrong answer when time runs out
+                    const options = document.querySelectorAll('.option-container');
+                    options.forEach(option => {
+                        option.classList.add('disabled');
+                    });
+                    
+                    // Show correct answer
+                    const correctAnswer = questions[currentQuestionIndex].answer;
+                    options[correctAnswer].classList.add('correct');
+                    
+                    // Show next button
+                    nextButton.style.display = 'block';
+                }
+            }, 1000);
+        }
+        
+        // End Quiz
+        function endQuiz() {
+            quizContainer.style.display = 'none';
+            scoreContainer.style.display = 'block';
+            scoreDisplay.textContent = `${score} / ${questions.length}`;
+            quizCompleted = true;
+        }
+        
+        // Restart Quiz
+        restartButton.addEventListener('click', () => {
+            scoreContainer.style.display = 'none';
+            startQuiz();
+        });
+        
+        // View Leaderboard
+        leaderboardButton.addEventListener('click', showLeaderboard);
+        viewLeaderboardButton.addEventListener('click', showLeaderboard);
+        
+        // Back Button
+        backButton.addEventListener('click', () => {
+            leaderboardContainer.style.display = 'none';
+            startScreen.style.display = 'block';
+        });
+        
+        // Save Score
+        saveScoreButton.addEventListener('click', () => {
+            const playerName = playerNameInput.value.trim();
+            if (playerName) {
+                saveScore(playerName, score);
+                showLeaderboard();
+            } else {
+                alert("Please enter your name to save your score!");
+            }
+        });
+        
+        // Save Score Function
+        function saveScore(name, score) {
+            let leaderboard = JSON.parse(localStorage.getItem('cyberQuizLeaderboard')) || [];
+            
+            // Add new score
+            leaderboard.push({
+                name: name,
+                score: score,
+                date: new Date().toLocaleDateString()
+            });
+            
+            // Sort by score (highest first)
+            leaderboard.sort((a, b) => b.score - a.score);
+            
+            // Save to localStorage
+            localStorage.setItem('cyberQuizLeaderboard', JSON.stringify(leaderboard));
+        }
+        
+        // Show Leaderboard
+        function showLeaderboard() {
+            // Hide other containers
+            startScreen.style.display = 'none';
+            quizContainer.style.display = 'none';
+            scoreContainer.style.display = 'none';
+            leaderboardContainer.style.display = 'block';
+            
+            // Get leaderboard data
+            const leaderboard = JSON.parse(localStorage.getItem('cyberQuizLeaderboard')) || [];
+            
+            // Clear previous entries
+            leaderboardBody.innerHTML = '';
+            
+            // Add new entries
+            if (leaderboard.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4" style="text-align: center;">No scores yet. Be the first!</td>';
+                leaderboardBody.appendChild(row);
+            } else {
+                leaderboard.forEach((entry, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${entry.name}</td>
+                        <td>${entry.score} / ${questions.length}</td>
+                        <td>${entry.date}</td>
+                    `;
+                    leaderboardBody.appendChild(row);
+                });
+            }
+        }
+        
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pre-load leaderboard data
+            const leaderboard = JSON.parse(localStorage.getItem('cyberQuizLeaderboard')) || [];
+            
+            // Populate leaderboard if there's data
+            if (leaderboard.length > 0) {
+                leaderboard.forEach((entry, index) => {
+                    if (index < 10) { // Show top 10 only
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${entry.name}</td>
+                            <td>${entry.score} / ${questions.length}</td>
+                            <td>${entry.date}</td>
+                        `;
+                        leaderboardBody.appendChild(row);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
